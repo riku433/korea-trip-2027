@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>韓国旅行マネージャー 2027</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f8fafc; color: #1e293b; }
+    </style>
+</head>
+<body class="min-h-screen pb-16 font-sans">
+
+    <!-- Header & Countdown -->
+    <header class="bg-white border-b border-rose-100 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-rose-500 flex items-center justify-center text-white text-xl shadow">
+                    <i class="fa-solid fa-plane-departure"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide text-slate-800">SEOUL TRIP 2027</h1>
+                    <p class="text-xs text-slate-500">2027.02.11 (木) 〜 02.14 (日) / 3泊4日</p>
+                </div>
+            </div>
+
+            <!-- Countdown Box -->
+            <div class="bg-rose-50 border border-rose-200 px-5 py-2 rounded-2xl text-center min-w-[210px] shadow-sm">
+                <div class="text-[11px] text-rose-500 uppercase tracking-wider font-bold">出発まであと</div>
+                <div id="countdown" class="text-2xl font-black text-rose-600 tracking-wider">計算中...</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-4xl mx-auto px-4 pt-6 space-y-6">
+
+        <!-- Tab Navigation -->
+        <div class="flex border-b border-slate-200 space-x-2 overflow-x-auto pb-1">
+            <button onclick="switchTab('checklist')" id="tab-checklist" class="tab-btn px-4 py-2 font-bold text-sm rounded-t-xl bg-white text-rose-600 border-t-2 border-rose-500 shadow-sm flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-list-check"></i> 持ち物・準備
+            </button>
+            <button onclick="switchTab('places')" id="tab-places" class="tab-btn px-4 py-2 font-bold text-sm rounded-t-xl bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-map-location-dot"></i> スポット・マップ
+            </button>
+            <button onclick="switchTab('itinerary')" id="tab-itinerary" class="tab-btn px-4 py-2 font-bold text-sm rounded-t-xl bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-calendar-days"></i> 旅程表 (2/11~14)
+            </button>
+            <button onclick="switchTab('tools')" id="tab-tools" class="tab-btn px-4 py-2 font-bold text-sm rounded-t-xl bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-toolbox"></i> 便利ツール・メモ
+            </button>
+        </div>
+
+        <!-- TAB 1: 持ち物・準備リスト -->
+        <section id="sec-checklist" class="tab-content space-y-4">
+            <!-- Add Item Form -->
+            <form onsubmit="addChecklistItem(event)" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-3">
+                <input type="text" id="prep-name" placeholder="準備物・持ち物を入力（例: パスポート, eSIM）" required class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-400">
+                <select id="prep-category" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-400">
+                    <option value="必携（重要書類・貴重品）">必携（重要書類・貴重品）</option>
+                    <option value="衣類・防寒具">衣類・防寒具</option>
+                    <option value="ガジェット・充電機器">ガジェット・充電機器</option>
+                    <option value="日用品・スキンケア">日用品・スキンケア</option>
+                    <option value="その他">その他</option>
+                </select>
+                <button type="submit" class="bg-rose-500 hover:bg-rose-600 text-white px-5 py-2 rounded-xl text-sm font-bold shadow-sm transition">追加</button>
+            </form>
+
+            <!-- Checklist Container -->
+            <div id="checklist-container" class="space-y-4"></div>
+        </section>
+
+        <!-- TAB 2: 行きたいスポット -->
+        <section id="sec-places" class="tab-content hidden space-y-4">
+            <!-- Add Place Form -->
+            <form onsubmit="addPlaceItem(event)" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <input type="text" id="place-name" placeholder="スポット名（例: オリーブヤング 明洞本店）" required class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-400">
+                    <select id="place-genre" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-400">
+                        <option value="グルメ・カフェ">グルメ・カフェ</option>
+                        <option value="ショッピング・服/コスメ">ショッピング・服/コスメ</option>
+                        <option value="観光・景勝地">観光・景勝地</option>
+                        <option value="サウナ・チムジルバン">サウナ・チムジルバン</option>
+                        <option value="その他">その他</option>
+                    </select>
+                    <select id="place-area" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-400">
+                        <option value="明洞 (ミョンドン)">明洞 (ミョンドン)</option>
+                        <option value="弘大 (ホンデ)">弘大 (ホンデ)</option>
+                        <option value="聖水 (ソンス)">聖水 (ソンス)</option>
+                        <option value="東大門 (トンデムン)">東大門 (トンデムン)</option>
+                        <option value="江南 (カンナム)">江南 (カンナム)</option>
+                        <option value="その他エリア">その他エリア</option>
+                    </select>
+                </div>
+                <div class="flex justify-end">
+                    <button type="submit" class="bg-rose-500 hover:bg-rose-600 text-white px-5 py-2 rounded-xl text-sm font-bold shadow-sm transition">スポットを追加</button>
+                </div>
+            </form>
+
+            <!-- Places List -->
+            <div id="places-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </section>
+
+        <!-- TAB 3: 旅程表 -->
+        <section id="sec-itinerary" class="tab-content hidden space-y-4">
+            <div class="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                <div>
+                    <h2 class="font-bold text-slate-800">旅程・スケジュールの管理</h2>
+                    <p class="text-xs text-slate-500">日程ごとに予定の追加・編集・削除が可能です</p>
+                </div>
+                <button onclick="addItineraryItem()" class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-sm transition flex items-center gap-1">
+                    <i class="fa-solid fa-plus"></i> 予定を追加
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="itinerary-days-container"></div>
+        </section>
+
+        <!-- TAB 4: 便利ツール & メモ -->
+        <section id="sec-tools" class="tab-content hidden space-y-6">
+            <!-- 簡易レート計算機 -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <h3 class="font-bold text-lg text-rose-500 flex items-center gap-2">
+                    <i class="fa-solid fa-calculator"></i> 韓国ウォン (KRW) ⇄ 日本円 (JPY) 簡易計算
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">ウォン (KRW)</label>
+                        <input type="number" id="krw-input" placeholder="10000" oninput="convertCurrency('krw')" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">概算 日本円 (JPY) ※目安: 100KRW ≒ 11円</label>
+                        <input type="number" id="jpy-input" placeholder="1100" oninput="convertCurrency('jpy')" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-400">
+                    </div>
+                </div>
+                <p class="text-xs text-slate-400">※「ウォンの末尾の0を1つ消す」とおおよその日本円になります。</p>
+            </div>
+
+            <!-- おすすめアプリ -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                <h3 class="font-bold text-lg text-rose-500 flex items-center gap-2">
+                    <i class="fa-solid fa-mobile-screen-button"></i> 現地で必須の便利アプリ
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <span class="font-bold text-slate-800 block mb-1">Naver Map (ネイバーマップ)</span>
+                        <p class="text-xs text-slate-500">徒歩・電車ルート検索が正確。日本語検索対応。</p>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <span class="font-bold text-slate-800 block mb-1">Papago (翻訳)</span>
+                        <p class="text-xs text-slate-500">画像・音声翻訳の精度が圧倒的。メニュー読取りに最適。</p>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <span class="font-bold text-slate-800 block mb-1">Subway Korea (地下鉄路線図)</span>
+                        <p class="text-xs text-slate-500">ソウルの地下鉄移動・乗り換え検索に必須の定番アプリ。</p>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <span class="font-bold text-slate-800 block mb-1">Kakao T (タクシー手配)</span>
+                        <p class="text-xs text-slate-500">行きたい場所を指定して簡単にタクシーを呼べるアプリ。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 自由メモ -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                <h3 class="font-bold text-lg text-rose-500 flex items-center gap-2">
+                    <i class="fa-solid fa-note-sticky"></i> 自由メモ（飛行機便名・ホテル情報・事前チケット等）
+                </h3>
+                <textarea id="free-memo" rows="6" onchange="saveMemo()" placeholder="例：&#10;往路: 福岡(FUK) -> 仁川(ICN) XX123便 10:00発&#10;ホテル: ○○ホテル明洞&#10;K-ETA / eSIM 設定メモ" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-400"></textarea>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal for Item Editing -->
+    <div id="edit-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl border border-slate-100 space-y-4">
+            <h3 class="font-bold text-slate-800 text-lg" id="modal-title">項目の編集</h3>
+            <div id="modal-body" class="space-y-3"></div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-sm font-bold">キャンセル</button>
+                <button id="modal-save-btn" class="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-sm font-bold">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript logic -->
+    <script>
+        // Initial Data Structures
+        const defaultChecklist = [
+            { id: 1, name: "パスポート（有効期限確認）", category: "必携（重要書類・貴重品）", checked: false },
+            { id: 2, name: "eSIM または 韓国用Wi-Fi", category: "ガジェット・充電機器", checked: false },
+            { id: 3, name: "クレジットカード / WOWPASS", category: "必携（重要書類・貴重品）", checked: false },
+            { id: 4, name: "コンセント変換プラグ (Cタイプ)", category: "ガジェット・充電機器", checked: false },
+            { id: 5, name: "防寒着（ダウン・手袋・カイロ）", category: "衣類・防寒具", checked: false }
+        ];
+
+        const defaultPlaces = [
+            { id: 1, name: "明洞ショッピング街", genre: "ショッピング・服/コスメ", area: "明洞 (ミョンドン)" },
+            { id: 2, name: "聖水洞 カフェ巡り", genre: "グルメ・カフェ", area: "聖水 (ソンス)" }
+        ];
+
+        const defaultItinerary = [
+            { id: 1, date: "2/11(木)", title: "Day 1 - 到着・明洞", detail: "・空港到着＆WOWPASS作成\n・ホテルチェックイン\n・明洞で両替＆食べ歩き" },
+            { id: 2, date: "2/12(金)", title: "Day 2 - 聖水＆買い物", detail: "・ソンスでカフェ巡り\n・韓国アパレル＆コスメ爆買い\n・夜はチキン＆ビール" },
+            { id: 3, date: "2/13(土)", title: "Day 3 - 観光＆サウナ", detail: "・景福宮（キョンボックン）散策\n・チムジルバン/サウナで整う\n・東大門ナイトショッピング" },
+            { id: 4, date: "2/14(日)", title: "Day 4 - 最終日＆帰国", detail: "・スーパーで韓国お菓子調達\n・空港へ移動・免税手続き\n・帰国" }
+        ];
+
+        let checklist = JSON.parse(localStorage.getItem('korea_checklist')) || defaultChecklist;
+        let places = JSON.parse(localStorage.getItem('korea_places')) || defaultPlaces;
+        let itinerary = JSON.parse(localStorage.getItem('korea_itinerary')) || defaultItinerary;
+        let memo = localStorage.getItem('korea_memo') || '';
+
+        // Tab Switching
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'text-rose-600', 'border-t-2', 'border-rose-500', 'shadow-sm');
+                btn.classList.add('bg-slate-100', 'text-slate-500');
+            });
+
+            document.getElementById(`sec-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+            activeBtn.classList.remove('bg-slate-100', 'text-slate-500');
+            activeBtn.classList.add('bg-white', 'text-rose-600', 'border-t-2', 'border-rose-500', 'shadow-sm');
+        }
+
+        // Countdown Timer
+        function updateCountdown() {
+            const targetDate = new Date('2027-02-11T00:00:00+09:00');
+            const now = new Date();
+            const diff = targetDate - now;
+
+            if (diff <= 0) {
+                document.getElementById('countdown').innerText = "旅行中！";
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const mins = Math.floor((diff / 1000 / 60) % 60);
+
+            document.getElementById('countdown').innerText = `${days}日 ${hours}時間 ${mins}分`;
+        }
+        setInterval(updateCountdown, 60000);
+        updateCountdown();
+
+        // Modal Helpers
+        function openModal(title, contentHtml, onSave) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-body').innerHTML = contentHtml;
+            const saveBtn = document.getElementById('modal-save-btn');
+            saveBtn.onclick = () => {
+                onSave();
+                closeModal();
+            };
+            document.getElementById('edit-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('edit-modal').classList.add('hidden');
+        }
+
+        // --- CHECKLIST LOGIC ---
+        function renderChecklist() {
+            const container = document.getElementById('checklist-container');
+            container.innerHTML = '';
+
+            const categories = [...new Set(checklist.map(i => i.category))];
+            categories.forEach(cat => {
+                const catItems = checklist.filter(i => i.category === cat);
+                const catBox = document.createElement('div');
+                catBox.className = "bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2";
+                
+                let itemsHtml = catItems.map(item => `
+                    <div class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition">
+                        <label class="flex items-center space-x-3 cursor-pointer flex-1">
+                            <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleCheck(${item.id})" class="w-4 h-4 accent-rose-500 rounded">
+                            <span class="${item.checked ? 'line-through text-slate-400' : 'text-slate-700'} text-sm font-medium">${item.name}</span>
+                        </label>
+                        <div class="flex gap-1">
+                            <button onclick="editChecklistItem(${item.id})" class="text-slate-400 hover:text-slate-600 px-2 py-1 text-xs">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button onclick="deleteChecklistItem(${item.id})" class="text-slate-400 hover:text-rose-500 px-2 py-1 text-xs">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+                catBox.innerHTML = `
+                    <h3 class="font-bold text-rose-500 text-sm border-b border-slate-100 pb-2 mb-1">${cat}</h3>
+                    <div class="space-y-1">${itemsHtml}</div>
+                `;
+                container.appendChild(catBox);
+            });
+        }
+
+        function addChecklistItem(e) {
+            e.preventDefault();
+            const name = document.getElementById('prep-name').value.trim();
+            const category = document.getElementById('prep-category').value;
+            if (!name) return;
+
+            checklist.push({ id: Date.now(), name, category, checked: false });
+            saveChecklist();
+            document.getElementById('prep-name').value = '';
+        }
+
+        function editChecklistItem(id) {
+            const item = checklist.find(i => i.id === id);
+            if (!item) return;
+
+            const html = `
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">持ち物名</label>
+                    <input type="text" id="edit-prep-name" value="${item.name}" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm text-slate-800">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">カテゴリ</label>
+                    <select id="edit-prep-category" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm text-slate-800">
+                        <option value="必携（重要書類・貴重品）" ${item.category === '必携（重要書類・貴重品）' ? 'selected' : ''}>必携（重要書類・貴重品）</option>
+                        <option value="衣類・防寒具" ${item.category === '衣類・防寒具' ? 'selected' : ''}>衣類・防寒具</option>
+                        <option value="ガジェット・充電機器" ${item.category === 'ガジェット・充電機器' ? 'selected' : ''}>ガジェット・充電機器</option>
+                        <option value="日用品・スキンケア" ${item.category === '日用品・スキンケア' ? 'selected' : ''}>日用品・スキンケア</option>
+                        <option value="その他" ${item.category === 'その他' ? 'selected' : ''}>その他</option>
+                    </select>
+                </div>
+            `;
+
+            openModal('持ち物の編集', html, () => {
+                item.name = document.getElementById('edit-prep-name').value.trim() || item.name;
+                item.category = document.getElementById('edit-prep-category').value;
+                saveChecklist();
+            });
+        }
+
+        function toggleCheck(id) {
+            const item = checklist.find(i => i.id === id);
+            if (item) item.checked = !item.checked;
+            saveChecklist();
+        }
+
+        function deleteChecklistItem(id) {
+            checklist = checklist.filter(i => i.id !== id);
+            saveChecklist();
+        }
+
+        function saveChecklist() {
+            localStorage.setItem('korea_checklist', JSON.stringify(checklist));
+            renderChecklist();
+        }
+
+        // --- PLACES LOGIC ---
+        function renderPlaces() {
+            const container = document.getElementById('places-container');
+            container.innerHTML = '';
+
+            if (places.length === 0) {
+                container.innerHTML = `<p class="text-slate-400 text-sm col-span-2 text-center py-6">登録されたスポットはありません。</p>`;
+                return;
+            }
+
+            places.forEach(place => {
+                const mapSearchUrl = `https://map.naver.com/v5/search/${encodeURIComponent(place.name)}`;
+                const googleMapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}`;
+
+                const card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-3";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs bg-rose-50 text-rose-600 font-bold px-2 py-0.5 rounded-lg border border-rose-100">${place.genre}</span>
+                            <span class="text-xs text-slate-500 font-semibold"><i class="fa-solid fa-location-dot"></i> ${place.area}</span>
+                        </div>
+                        <h4 class="font-bold text-slate-800 text-base mt-2">${place.name}</h4>
+                    </div>
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                        <div class="flex gap-2">
+                            <a href="${mapSearchUrl}" target="_blank" class="text-xs bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-sm transition">
+                                Naverマップ <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                            </a>
+                            <a href="${googleMapUrl}" target="_blank" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 transition">
+                                Google <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                            </a>
+                        </div>
+                        <div class="flex gap-1">
+                            <button onclick="editPlace(${place.id})" class="text-slate-400 hover:text-slate-600 px-2 py-1 text-xs">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button onclick="deletePlace(${place.id})" class="text-slate-400 hover:text-rose-500 px-2 py-1 text-xs">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function addPlaceItem(e) {
+            e.preventDefault();
+            const name = document.getElementById('place-name').value.trim();
+            const genre = document.getElementById('place-genre').value;
+            const area = document.getElementById('place-area').value;
+            if (!name) return;
+
+            places.push({ id: Date.now(), name, genre, area });
+            savePlaces();
+            document.getElementById('place-name').value = '';
+        }
+
+        function editPlace(id) {
+            const place = places.find(p => p.id === id);
+            if (!place) return;
+
+            const html = `
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">スポット名</label>
+                    <input type="text" id="edit-place-name" value="${place.name}" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm text-slate-800">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">ジャンル</label>
+                    <select id="edit-place-genre" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm text-slate-800">
+                        <option value="グルメ・カフェ" ${place.genre === 'グルメ・カフェ' ? 'selected' : ''}>グルメ・カフェ</option>
+                        <option value="ショッピング・服/コスメ" ${place.genre === 'ショッピング・服/コスメ' ? 'selected' : ''}>ショッピング・服/コスメ</option>
+                        <option value="観光・景勝地" ${place.genre === '観光・景勝地' ? 'selected' : ''}>観光・景勝地</option>
+                        <option value="サウナ・チムジルバン" ${place.genre === 'サウナ・チムジルバン' ? 'selected' : ''}>サウナ・チムジルバン</option>
+                        <option value="その他" ${place.genre === 'その他' ? 'selected' : ''}>その他</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">エリア</label>
+                    <select id="edit-place-area" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm text-slate-800">
+                        <option value="明洞 (ミョンドン)" ${place.area === '明洞 (ミョンドン)' ? 'selected' : ''}>明洞 (ミョンドン)</option>
+                        <option value="弘大 (ホンデ)" ${place.area === '弘大 (ホンデ)' ? 'selected' : ''}>弘大 (ホンデ)</option>
+                        <option value="聖水 (ソンス)" ${place.area === '聖水 (ソンス)' ? 'selected' : ''}>聖水 (ソンス)</option>
+                        <option value="東大門 (トンデムン)" ${place.area === '東大門 (トンデムン)' ? 'selected' : ''}>東大門 (トンデムン)</option>
+                        <option value="江南 (カンナム)" ${place.area === '江南 (カンナム)' ? 'selected' : ''}>江南 (カンナム)</option>
+                        <option value="その他エリア" ${place.area === 'その他エリア' ? 'selected' : ''}>その他エリア</option>
+                    </select>
+                </div>
+            `;
+
+            openModal('スポットの編集', html, () => {
+                place.name = document.getElementById('edit-place-name').value.trim() || place.name;
+                place.genre = document.getElementById('edit-place-genre').value;
+                place.area = document.getElementById('edit-place-area').value;
+                savePlaces();
+            });
+        }
+
+        function deletePlace(id) {
+            places = places.filter(p => p.id !== id);
+            savePlaces();
+        }
+
+        function savePlaces() {
+            localStorage.setItem('korea_places', JSON.stringify(places));
+            renderPlaces();
+        }
+
+        // --- ITINERARY LOGIC ---
+        function renderItinerary() {
+            const container = document.getElementById('itinerary-days-container');
+            container.innerHTML = '';
+
+            itinerary.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3 flex flex-col justify-between";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                            <span class="font-black text-rose-500 text-sm">${item.date}</span>
+                            <span class="font-bold text-slate-700 text-xs bg-slate-100 px-2 py-0.5 rounded-lg">${item.title}</span>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-3 whitespace-pre-wrap leading-relaxed">${item.detail}</p>
+                    </div>
+                    <div class="flex justify-end gap-1 pt-2 border-t border-slate-100">
+                        <button onclick="editItineraryItem(${item.id})" class="text-slate-400 hover:text-slate-600 px-2 py-1 text-xs">
+                            <i class="fa-solid fa-pen"></i> 編集
+                        </button>
+                        <button onclick="deleteItineraryItem(${item.id})" class="text-slate-400 hover:text-rose-500 px-2 py-1 text-xs">
+                            <i class="fa-solid fa-trash"></i> 削除
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function addItineraryItem() {
+            const html = `
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">日付（例: 2/11(木)）</label>
+                    <input type="text" id="add-itin-date" placeholder="2/11(木)" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm text-slate-800">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">タイトル（例: Day 1 - 到着）</label>
+                    <input type="text" id="add-itin-title" placeholder="Day 1 - 到着" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm text-slate-800">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">詳細・予定</label>
+                    <textarea id="add-itin-detail" rows="4" placeholder="・○○を見る&#10;・○○を食べる" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm text-slate-800"></textarea>
+                </div>
+            `;
+
+            openModal('新規予定の追加', html, () => {
+                const date = document.getElementById('add-itin-date').value.trim();
+                const title = document.getElementById('add-itin-title').value.trim();
+                const detail = document.getElementById('add-itin-detail').value;
+                if (!date || !title) return;
+
+                itinerary.push({ id: Date.now(), date, title, detail });
+                saveItinerary();
+            });
+        }
+
+        function editItineraryItem(id) {
+            const item = itinerary.find(i => i.id === id);
+            if (!item) return;
+
+            const html = `
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">日付</label>
+                    <input type="text" id="edit-itin-date" value="${item.date}" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm text-slate-800">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">タイトル</label>
+                    <input type="text" id="edit-itin-title" value="${item.title}" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm text-slate-800">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">詳細・予定</label>
+                    <textarea id="edit-itin-detail" rows="5" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm text-slate-800">${item.detail}</textarea>
+                </div>
+            `;
+
+            openModal('旅程の編集', html, () => {
+                item.date = document.getElementById('edit-itin-date').value.trim() || item.date;
+                item.title = document.getElementById('edit-itin-title').value.trim() || item.title;
+                item.detail = document.getElementById('edit-itin-detail').value;
+                saveItinerary();
+            });
+        }
+
+        function deleteItineraryItem(id) {
+            itinerary = itinerary.filter(i => i.id !== id);
+            saveItinerary();
+        }
+
+        function saveItinerary() {
+            localStorage.setItem('korea_itinerary', JSON.stringify(itinerary));
+            renderItinerary();
+        }
+
+        // --- TOOLS LOGIC ---
+        function convertCurrency(type) {
+            const krw = document.getElementById('krw-input');
+            const jpy = document.getElementById('jpy-input');
+            const rate = 0.11;
+
+            if (type === 'krw') {
+                jpy.value = krw.value ? Math.round(krw.value * rate) : '';
+            } else {
+                krw.value = jpy.value ? Math.round(jpy.value / rate) : '';
+            }
+        }
+
+        function saveMemo() {
+            const memoVal = document.getElementById('free-memo').value;
+            localStorage.setItem('korea_memo', memoVal);
+        }
+
+        // Init
+        renderChecklist();
+        renderPlaces();
+        renderItinerary();
+        document.getElementById('free-memo').value = memo;
+    </script>
+</body>
+</html>
